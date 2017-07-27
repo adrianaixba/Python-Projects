@@ -30,7 +30,7 @@ def print_rules():
     print('')
 
 # prints the available positions
-def print_available_positions():
+def print_available_positions(availablePositions):
     print('The available positions are:')
     print(availablePositions)
     print('')
@@ -44,15 +44,14 @@ def play_game():
         possiblePositions = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         print_board(currentBoard)
         winner = round(currentBoard, possiblePositions, playerPieces)
-        if winner == 0:
-         print("Player 1 wins!\n")
-        elif winner == 1:
-            print("Player 2 wins!\n")
-        else:
+        if winner == False:
             print("There was a tie!\n")
+        elif winner == 1:
+            print("Player 1 wins!\n")
+        else:
+            print("Player 2 wins!\n")
         # asks the user if they want to replay
         playAgain = raw_input("Another game? Press 'Y' to play again. ")
-        print(board)
         if playAgain.upper() != 'Y':
             keepPlaying = False
 
@@ -70,20 +69,20 @@ def win_check(currentBoard, mark):
 
 # gets the position from the user, through inputs
 # param: the number of the player (1 or 2) & current board
-def get_user_input(playerNumber, currentBoard):
+def get_user_input(playerNumber, currentBoard, availablePositions):
     # position needs to be int, cannot be used up, has to be within range
-    print_available_positions()
+    print_available_positions(availablePositions)
     while True:
         try:
             position = int(raw_input('Player ' + str(playerNumber + 1) + ' where would you like to place your marker? '))
         except ValueError:
             print('Please pick an available position. ')
-            print_available_positions()
+            print_available_positions(availablePositions)
             continue
         else:
             if position < 1 or position > 9 or currentBoard[position] != ' ':
                 print ('Please pick an available position. ')
-                print_available_positions()
+                print_available_positions(availablePositions)
                 continue
             break
     return position
@@ -93,33 +92,28 @@ def get_user_input(playerNumber, currentBoard):
 def round(currentBoard, availablePositions, playerPieces):
     counter = 0
     # continue the game as long as there is not a tie
-    while not check_full(currentBoard):
+    while not check_full(availablePositions):
         if counter == 2:
             counter = 0
-        position = get_user_input(counter, currentBoard)
+        position = get_user_input(counter, currentBoard, availablePositions)
         place_marker(currentBoard, counter, position, playerPieces)
         # remove the current position from the available
         availablePositions.remove(position)
         print_board(currentBoard)
-        if win_check(currentBoard, playerPieces[counter]):
+        if win_check(currentBoard, playerPieces[counter]) or check_full(availablePositions):
             break
         else:
             counter = counter + 1
     # check if winner or tie
-    if check_full(currentBoard):
+    if check_full(availablePositions):
         return False
     # there is a winner, return their player #
     return counter
 
 # checks if the board is full
 # param: current board
-def check_full(currentBoard):
-    for index in range(len(currentBoard)):
-        if board[index] == ' ':
-            # board is not full
-            return False
-    # board is full
-    return True
+def check_full(availablePositions):
+    return len(availablePositions) == 0
 
 # assigns pieces to player 1 and 2
 def player_assignment():
